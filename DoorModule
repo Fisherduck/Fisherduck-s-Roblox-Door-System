@@ -1,0 +1,69 @@
+local TweenService = game:GetService("TweenService")
+
+local Door = {}
+Door.__index = Door
+
+----------------------------------------
+
+function Door.new(model, requiredKey)
+	local self = setmetatable({}, Door)
+	self.Model = model
+	self.RequiredKey = requiredKey
+	self.IsLocked = true
+	self.IsOpen = false
+	self.OriginalPosition = self.Model.PrimaryPart.CFrame
+	return self
+end
+
+----------------------------------------
+
+function Door:OpenorClose(prompt)
+	if not self.IsLocked then
+		
+		local tweenInfo = TweenInfo.new( 1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out )
+		
+		if self.IsOpen then
+			local goal = {
+				CFrame = self.OriginalPosition * CFrame.Angles(0, math.rad(-90), 0)
+			}
+
+			local tween = TweenService:Create(self.Model.PrimaryPart, tweenInfo, goal)
+			tween:Play()
+
+			prompt.ActionText = "Close"
+		else
+			local goal = {
+				CFrame = self.OriginalPosition
+			}
+
+			local tween = TweenService:Create(self.Model.PrimaryPart, tweenInfo, goal)
+			tween:Play()
+			
+			prompt.ActionText = "Open"
+		end
+
+		self.IsOpen = not self.IsOpen
+	end
+end
+
+----------------------------------------
+
+function Door:LockorUnlock(key, prompt)
+	if key == self.RequiredKey then
+		self.IsLocked = not self.IsLocked
+
+		if self.IsLocked then
+			prompt.ActionText = "Unlock"
+		else
+			prompt.ActionText = "Lock"
+		end
+
+		print("Door is now " .. (self.IsLocked and "locked" or "unlocked"))
+	else
+		print("Wrong key!")
+	end
+end
+
+----------------------------------------
+
+return Door
